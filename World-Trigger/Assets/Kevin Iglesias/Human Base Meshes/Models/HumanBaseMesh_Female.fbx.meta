@@ -1,5 +1,12 @@
 fileFormatVersion: 2
 guid: b4a78df37623594419bf022884020eeb
+AssetOrigin:
+  serializedVersion: 1
+  productId: 178395
+  packageName: Human Base Meshes
+  packageVersion: 2.0
+  assetPath: Assets/Kevin Iglesias/Human Base Meshes/Models/HumanBaseMesh_Female.fbx
+  uploadId: 706734
 ModelImporter:
   serializedVersion: 22200
   internalIDToNameTable: []
@@ -16,8 +23,6 @@ ModelImporter:
     optimizeGameObjects: 0
     removeConstantScaleCurves: 0
     motionNodeName: 
-    rigImportErrors: 
-    rigImportWarnings: 
     animationImportErrors: 
     animationImportWarnings: 
     animationRetargetingWarnings: 
@@ -843,10 +848,3 @@ ModelImporter:
   userData: 
   assetBundleName: 
   assetBundleVariant: 
-AssetOrigin:
-  serializedVersion: 1
-  productId: 178395
-  packageName: Human Base Meshes
-  packageVersion: 2.0
-  assetPath: Assets/Kevin Iglesias/Human Base Meshes/Models/HumanBaseMesh_Female.fbx
-  uploadId: 706734
