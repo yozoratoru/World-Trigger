@@ -1573,7 +1573,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: "\u30AC\u30C8\u30EA\u30F3\u30B0"
+  m_Text: "\u30B7\u30E7\u30C3\u30C8\u30AC\u30F3"
 --- !u!222 &301797028
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -3961,6 +3961,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   moveSpeed: 5
   jumpForce: 5
+  rb: {fileID: 0}
+  isGrounded: 0
 --- !u!54 &904987612
 Rigidbody:
   m_ObjectHideFlags: 0
