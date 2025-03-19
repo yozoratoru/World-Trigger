@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class AsteroidController : MonoBehaviour
 {
-    public GameObject[] asteroidPrefabs; // 0:1分割, 1:4分割, 2:8分割, 3:16分割,
+    public GameObject[] asteroidPrefabs; 
     private GameObject currentAsteroid;
     private float holdTime = 0f;
     private int currentLevel = 0;
@@ -23,7 +23,6 @@ public class AsteroidController : MonoBehaviour
 
         if (Input.GetKeyUp(KeyCode.C))
         {
-            ReleaseAsteroid();
         }
     }
 
@@ -47,17 +46,4 @@ public class AsteroidController : MonoBehaviour
         }
     }
 
-    void ReleaseAsteroid()
-    {
-        isCharging = false;
-        if (currentAsteroid != null)
-        {
-            // 発射処理（Rigidbodyを加えるなど）
-            Rigidbody rb = currentAsteroid.AddComponent<Rigidbody>();
-            rb.linearVelocity = transform.forward * 10f;
-            // Freeze RotationをXYZすべて固定
-        rb.freezeRotation = true;
-        rb.constraints = RigidbodyConstraints.FreezeRotation;
-        }
-    }
 }
