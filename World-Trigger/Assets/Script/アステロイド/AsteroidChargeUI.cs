@@ -1,6 +1,7 @@
 using UnityEngine;
+using TMPro;
 
-public class AsteroidController : MonoBehaviour
+public class AsteroidChargeUI : MonoBehaviour
 {
     public GameObject[] asteroidPrefabs;
     private GameObject currentAsteroid;
@@ -8,6 +9,11 @@ public class AsteroidController : MonoBehaviour
     private float holdTime = 0f;
     private int currentLevel = 0;
     private bool isCharging = false;
+
+    public TextMeshProUGUI levelText;
+
+    // 分割数を定義（順番に1, 8, 27, 64）
+    private int[] splitCounts = { 1, 8, 27, 64 };
 
     void Update()
     {
@@ -24,7 +30,7 @@ public class AsteroidController : MonoBehaviour
 
         if (Input.GetKeyUp(KeyCode.C))
         {
-            ConfirmAsteroid(); // ← ここで確定処理を実行
+            // ※今後ここで発射処理を追加予定
         }
     }
 
@@ -35,6 +41,7 @@ public class AsteroidController : MonoBehaviour
         isCharging = true;
 
         currentAsteroid = Instantiate(asteroidPrefabs[currentLevel], transform.position, Quaternion.identity);
+        UpdateLevelText();
     }
 
     void UpdateAsteroid()
@@ -46,21 +53,15 @@ public class AsteroidController : MonoBehaviour
             Destroy(currentAsteroid);
             currentLevel = newLevel;
             currentAsteroid = Instantiate(asteroidPrefabs[currentLevel], transform.position, Quaternion.identity);
+            UpdateLevelText();
         }
     }
 
-    // 確定処理：アニメーション再生
-    void ConfirmAsteroid()
+    void UpdateLevelText()
     {
-        isCharging = false;
-
-        if (currentAsteroid != null)
+        if (levelText != null && currentLevel < splitCounts.Length)
         {
-            Animator animator = currentAsteroid.GetComponent<Animator>();
-            if (animator != null)
-            {
-                animator.SetTrigger("Start"); // Animatorの"Start"トリガーを使ってアニメーション開始
-            }
+            levelText.text = $"{splitCounts[currentLevel]} ";
         }
     }
 }
