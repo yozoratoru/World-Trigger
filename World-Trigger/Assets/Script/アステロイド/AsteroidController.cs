@@ -3,6 +3,7 @@ using UnityEngine;
 public class AsteroidController : MonoBehaviour
 {
     public GameObject[] asteroidPrefabs;
+    public Transform spawnPoint; // ← 追加：空のオブジェクトをInspectorから指定
     private GameObject currentAsteroid;
 
     private float holdTime = 0f;
@@ -20,6 +21,12 @@ public class AsteroidController : MonoBehaviour
         {
             holdTime += Time.deltaTime;
             UpdateAsteroid();
+
+            // チャージ中も位置を追従させたい場合
+            if (currentAsteroid != null)
+            {
+                currentAsteroid.transform.position = spawnPoint.position;
+            }
         }
 
         if (Input.GetKeyUp(KeyCode.C))
@@ -34,7 +41,7 @@ public class AsteroidController : MonoBehaviour
         currentLevel = 0;
         isCharging = true;
 
-        currentAsteroid = Instantiate(asteroidPrefabs[currentLevel], transform.position, Quaternion.identity);
+        currentAsteroid = Instantiate(asteroidPrefabs[currentLevel], spawnPoint.position, Quaternion.identity);
     }
 
     void UpdateAsteroid()
@@ -45,11 +52,10 @@ public class AsteroidController : MonoBehaviour
         {
             Destroy(currentAsteroid);
             currentLevel = newLevel;
-            currentAsteroid = Instantiate(asteroidPrefabs[currentLevel], transform.position, Quaternion.identity);
+            currentAsteroid = Instantiate(asteroidPrefabs[currentLevel], spawnPoint.position, Quaternion.identity);
         }
     }
 
-    // 確定処理：アニメーション再生
     void ConfirmAsteroid()
     {
         isCharging = false;
