@@ -78,6 +78,7 @@ public class AsteroidController : MonoBehaviour
         }
 
         currentAsteroid = Instantiate(asteroidPrefabs[currentLevel], spawnPoint.position, spawnPoint.rotation);
+        currentAsteroid.transform.SetParent(spawnPoint); // ★ spawnPoint の子にする
     }
 
     void UpdateAsteroid()
@@ -89,6 +90,7 @@ public class AsteroidController : MonoBehaviour
             Destroy(currentAsteroid);
             currentLevel = newLevel;
             currentAsteroid = Instantiate(asteroidPrefabs[currentLevel], spawnPoint.position, spawnPoint.rotation);
+            currentAsteroid.transform.SetParent(spawnPoint); // ★ spawnPoint の子にする
         }
     }
 
@@ -145,6 +147,9 @@ public class AsteroidController : MonoBehaviour
         {
             // 発射時：XZの固定を解除、Yと回転は固定のまま
             rb.constraints = RigidbodyConstraints.FreezePositionY | RigidbodyConstraints.FreezeRotation;
+
+            // ★親から切り離して独立させる（spawnPoint に追従しないように）
+            cube.SetParent(null);
 
             // 少しずらして衝突を防止
             cube.position += new Vector3(Random.Range(-0.05f, 0.05f), 0, Random.Range(-0.05f, 0.05f));
