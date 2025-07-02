@@ -1,29 +1,52 @@
 using UnityEngine;
 
-public class Grasshopper : MonoBehaviour
+namespace CameraSample.Scripts._3D
 {
-    public float jumpPower = 10f;
-
-    private void OnCollisionEnter(Collision collision)
+    public class Grasshopper : MonoBehaviour
     {
-        if (collision.gameObject.CompareTag("Player"))
+        [Header("グラスホッパー設定")]
+        [SerializeField] private float blinkDistance = 5f;
+        [SerializeField] private float cooldownTime = 3f;
+        [SerializeField] private KeyCode skillKey = KeyCode.V;
+
+        private float cooldownTimer = 0f;
+        private PlayerController3D playerController;
+
+        private void Start()
         {
-            // プレイヤーのカメラ方向を使ってジャンプ方向を決定
-            Vector3 dir = Camera.main.transform.forward;
-            dir.y = 0f; // 上方向の要素は手動で加えるため水平方向だけ使う
-            dir.Normalize();
-
-            Vector3 jumpVec = dir * jumpPower + Vector3.up * (jumpPower / 2f);
-
-            Rigidbody rb = collision.gameObject.GetComponent<Rigidbody>();
-            if (rb != null)
+            // プレイヤーコントローラー取得
+            playerController = GetComponent<PlayerController3D>();
+            if (playerController == null)
             {
-                rb.linearVelocity = Vector3.zero; // 一旦速度リセット
-                rb.AddForce(jumpVec, ForceMode.VelocityChange);
+                Debug.LogError("Grasshopper: PlayerController3D が必要です。");
             }
+        }
 
-            // 一度発動したら削除（使い捨て）
-            Destroy(gameObject);
+        private void Update()
+        {
+            if (cooldownTimer > 0f)
+                cooldownTimer -= Time.deltaTime;
+
+            if (Input.GetKeyDown(skillKey) && cooldownTimer <= 0f)
+            {
+                TryBlink();
+            }
+        }
+
+        private void TryBlink()
+        {
+            // 地面にいないならスキル発動不可
+            if (!playerController.IsGrounded) return;
+
+            // 前方向にブリンク
+            Vector3 blinkDirection = transform.forward;
+            Vector3 targetPosition = transform.position + blinkDirection * blinkDistance;
+
+            // 壁貫通が気になる場合は Raycast などで補正可能
+            transform.position = targetPosition;
+
+            // クールダウン開始
+            cooldownTimer = cooldownTime;
         }
     }
 }

@@ -21,6 +21,14 @@ namespace CameraSample.Scripts._3D
         [SerializeField] private float mouseSensitivity = 100f;
         [SerializeField] private float mouseSmoothTime = 0.05f;
 
+        [Header("グラスホッパースキル設定")]
+        [SerializeField] private GameObject grasshopperPrefab;
+        [SerializeField] private Transform grasshopperPoint;
+        [SerializeField] private float grasshopperCooldown = 5f;
+        [SerializeField] private KeyCode grasshopperKey = KeyCode.V;
+
+        private float nextGrasshopperUseTime = 0f;
+
         private float xRotation = 0f;
         private Vector2 currentMouseDelta;
         private Vector2 currentMouseDeltaVelocity;
@@ -29,9 +37,12 @@ namespace CameraSample.Scripts._3D
         private Vector3 velocity;
         private bool isGrounded;
 
+        // スキル用
+        private bool isMovementLocked = false;
+        private Vector3 externalVelocity = Vector3.zero;
+
         private void Start()
         {
-            // CharacterControllerの取得または追加
             characterController = GetComponent<CharacterController>();
             if (characterController == null)
             {
@@ -40,10 +51,8 @@ namespace CameraSample.Scripts._3D
                 characterController.radius = 0.5f;
             }
 
-            // カーソルロック
             Cursor.lockState = CursorLockMode.Locked;
 
-            // カメラの設定（自動取得）
             if (cameraTransform == null && Camera.main != null)
             {
                 cameraTransform = Camera.main.transform;
@@ -54,17 +63,16 @@ namespace CameraSample.Scripts._3D
         {
             HandleCameraLook();
             HandleMovementAndJump();
+            HandleGrasshopperSkill();
         }
 
         private void HandleCameraLook()
         {
-            // マウス入力の取得
             Vector2 targetMouseDelta = new Vector2(
                 Input.GetAxis("Mouse X"),
                 Input.GetAxis("Mouse Y")
             );
 
-            // スムーズに補間
             currentMouseDelta = Vector2.SmoothDamp(
                 currentMouseDelta,
                 targetMouseDelta,
@@ -72,7 +80,6 @@ namespace CameraSample.Scripts._3D
                 mouseSmoothTime
             );
 
-            // 垂直回転（カメラ）
             xRotation -= currentMouseDelta.y * mouseSensitivity * Time.deltaTime;
             xRotation = Mathf.Clamp(xRotation, -90f, 90f);
             if (cameraTransform != null)
@@ -80,7 +87,6 @@ namespace CameraSample.Scripts._3D
                 cameraTransform.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
             }
 
-            // 水平回転（プレイヤー本体）
             transform.Rotate(Vector3.up * currentMouseDelta.x * mouseSensitivity * Time.deltaTime);
         }
 
@@ -88,7 +94,6 @@ namespace CameraSample.Scripts._3D
         {
             isGrounded = characterController.isGrounded;
 
-            // 入力
             float horizontalInput = 0f;
             float verticalInput = 0f;
             if (Input.GetKey(leftKey)) horizontalInput = -1f;
@@ -96,33 +101,82 @@ namespace CameraSample.Scripts._3D
             if (Input.GetKey(forwardKey)) verticalInput = 1f;
             if (Input.GetKey(backwardKey)) verticalInput = -1f;
 
-            // 移動方向を作成
-            Vector3 moveDirection = new Vector3(horizontalInput, 0, verticalInput).normalized;
-            Vector3 move = transform.TransformDirection(moveDirection) * moveSpeed;
+            Vector3 inputDir = new Vector3(horizontalInput, 0, verticalInput).normalized;
+            Vector3 move = transform.TransformDirection(inputDir) * moveSpeed;
 
-            // 接地時の処理
             if (isGrounded && velocity.y < 0)
             {
                 velocity.y = -2f;
             }
 
-            // ジャンプ入力
             if (Input.GetKeyDown(jumpKey) && isGrounded)
             {
                 velocity.y = Mathf.Sqrt(jumpForce * -2f * gravity);
             }
 
-            // 重力の適用
             velocity.y += gravity * Time.deltaTime;
 
-            // 移動にY成分を加える
-            move.y = velocity.y;
+            // === 合成移動（スキル + 通常移動 + 重力）===
+            Vector3 totalMove = move;
+            if (isMovementLocked)
+            {
+                totalMove = externalVelocity; // 外部スキル移動優先
+            }
 
-            // 移動
-            characterController.Move(move * Time.deltaTime);
+            totalMove.y = velocity.y;
+            characterController.Move(totalMove * Time.deltaTime);
         }
 
-        // 外部から情報取得用プロパティ
+        private void HandleGrasshopperSkill()
+{
+    if (Input.GetKeyDown(grasshopperKey) && Time.time >= nextGrasshopperUseTime)
+    {
+        // if (grasshopperPrefab != null && grasshopperPoint != null)
+        // {
+        //     Instantiate(grasshopperPrefab, grasshopperPoint.position, Quaternion.identity);
+        // }
+
+        Vector3 inputDir = Vector3.zero;
+        if (Input.GetKey(forwardKey)) inputDir += Vector3.forward;
+        if (Input.GetKey(backwardKey)) inputDir += Vector3.back;
+        if (Input.GetKey(leftKey)) inputDir += Vector3.left;
+        if (Input.GetKey(rightKey)) inputDir += Vector3.right;
+
+        inputDir = inputDir.normalized;
+
+        Vector3 moveDir;
+
+        if (inputDir == Vector3.zero)
+        {
+            // ニュートラル時は上に飛ぶ
+            moveDir = Vector3.up;
+        }
+        else
+        {
+            // 入力方向に対して、カメラ方向基準で移動
+            moveDir = transform.TransformDirection(inputDir);
+        }
+
+        LockMovement(0.5f, moveDir);
+        nextGrasshopperUseTime = Time.time + grasshopperCooldown;
+    }
+}
+
+
+        private void LockMovement(float duration, Vector3 direction)
+        {
+            isMovementLocked = true;
+            externalVelocity = direction.normalized * moveSpeed * 3f;
+            Invoke(nameof(UnlockMovement), duration);
+        }
+
+        private void UnlockMovement()
+        {
+            isMovementLocked = false;
+            externalVelocity = Vector3.zero;
+        }
+
+        // 外部取得用プロパティ
         public Vector3 Position => transform.position;
         public bool IsGrounded => isGrounded;
         public float VelocityY => velocity.y;

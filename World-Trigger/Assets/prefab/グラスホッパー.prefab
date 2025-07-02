@@ -13,10 +13,9 @@ GameObject:
   - component: {fileID: 6165706617425430148}
   - component: {fileID: 5427614298665011065}
   - component: {fileID: 7624264057928945424}
-  - component: {fileID: 6064658731313812968}
   m_Layer: 0
   m_Name: "\u30B0\u30E9\u30B9\u30DB\u30C3\u30D1\u30FC"
-  m_TagString: Untagged
+  m_TagString: GrassHopper
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -104,7 +103,7 @@ BoxCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
@@ -137,16 +136,3 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
---- !u!114 &6064658731313812968
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6965603133755837652}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 29f85a5c75af3944ba1273ce9202ae71, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  jumpPower: 100

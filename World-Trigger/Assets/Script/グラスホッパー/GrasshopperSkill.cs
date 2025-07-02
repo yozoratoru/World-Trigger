@@ -4,18 +4,20 @@ public class GrasshopperSkill : MonoBehaviour
 {
     public GameObject grasshopperPrefab;       // グラスホッパーのプレハブ
     public Transform grasshopperPoint;         // 足元の設置ポイント
-    public float jumpPower = 10f;              // 飛ばす力
-    public float cooldownTime = 5f;            // クールダウン
-    private float nextUseTime = 0f;            // 次に使える時間
+    public float cooldownTime = 5f;            // クールダウン時間（秒）
+    private float nextUseTime = 0f;            // 次に使用可能な時間
 
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.V) && Time.time >= nextUseTime)
         {
-            // グラスホッパーを設置
-            Instantiate(grasshopperPrefab, grasshopperPoint.position, Quaternion.identity);
+            // グラスホッパーを足元に設置
+            GameObject instance = Instantiate(grasshopperPrefab, grasshopperPoint.position, Quaternion.identity);
 
-            // クールダウン更新
+            // 1秒後に自動で削除
+            Destroy(instance, 1f);
+
+            // クールダウンを設定
             nextUseTime = Time.time + cooldownTime;
         }
     }
