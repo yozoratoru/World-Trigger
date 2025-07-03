@@ -3998,7 +3998,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 905980863}
-  - component: {fileID: 905980862}
+  - component: {fileID: 905980865}
   - component: {fileID: 905980864}
   m_Layer: 0
   m_Name: GameObject (1)
@@ -4007,18 +4007,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &905980862
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 905980861}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d6d81ff6e26dd994a9822d1ab7461513, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!4 &905980863
 Transform:
   m_ObjectHideFlags: 0
@@ -4043,7 +4031,19 @@ MonoBehaviour:
   m_GameObject: {fileID: 905980861}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7735c640393be9049915032271e2dbf4, type: 3}
+  m_Script: {fileID: 11500000, guid: bbe79c1f8d3668c41bcab075e1c94502, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &905980865
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 905980861}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: be5073dabaa870544960e85986b25ab4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   asteroidController: {fileID: 904987617}

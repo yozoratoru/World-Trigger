@@ -13,7 +13,9 @@ public class AsteroidController : MonoBehaviour
     private int currentLevel = 0;
     private bool isCharging = false;
     private bool isConfirmed = false;
+
     private KeyCode activationKey = KeyCode.None;
+    private bool justSet = false;
 
     private List<Transform> asteroidParts = new List<Transform>();
     private int currentShootIndex = 0;
@@ -22,17 +24,26 @@ public class AsteroidController : MonoBehaviour
     public void SetActivationKey(KeyCode key)
     {
         activationKey = key;
+        justSet = true; // スキル切り替え直後の誤発動防止
     }
 
     void Update()
     {
         if (activationKey == KeyCode.None) return;
 
+        if (justSet)
+        {
+            justSet = false;
+            return;
+        }
+
+        // キーを押した瞬間：チャージ開始
         if (Input.GetKeyDown(activationKey))
         {
             StartCharging();
         }
 
+        // チャージ中：レベルアップ、位置追従
         if (Input.GetKey(activationKey) && isCharging)
         {
             holdTime += Time.deltaTime;
@@ -45,11 +56,13 @@ public class AsteroidController : MonoBehaviour
             }
         }
 
+        // キーを離した瞬間：チャージ終了
         if (Input.GetKeyUp(activationKey) && isCharging)
         {
             ConfirmAsteroid();
         }
 
+        // 左クリック：分離Cubeを順に発射
         if (Input.GetMouseButton(0) && isConfirmed && asteroidParts.Count > 0)
         {
             shootTimer += Time.deltaTime;
@@ -78,7 +91,7 @@ public class AsteroidController : MonoBehaviour
         }
 
         currentAsteroid = Instantiate(asteroidPrefabs[currentLevel], spawnPoint.position, spawnPoint.rotation);
-        currentAsteroid.transform.SetParent(spawnPoint); // ★ spawnPoint の子にする
+        currentAsteroid.transform.SetParent(spawnPoint);
     }
 
     void UpdateAsteroid()
@@ -90,11 +103,10 @@ public class AsteroidController : MonoBehaviour
             Destroy(currentAsteroid);
             currentLevel = newLevel;
             currentAsteroid = Instantiate(asteroidPrefabs[currentLevel], spawnPoint.position, spawnPoint.rotation);
-            currentAsteroid.transform.SetParent(spawnPoint); // ★ spawnPoint の子にする
+            currentAsteroid.transform.SetParent(spawnPoint);
         }
     }
 
-    // チャージ完了後、各CubeにRigidbody・Colliderをつけて準備
     void ConfirmAsteroid()
     {
         isCharging = false;
@@ -113,31 +125,22 @@ public class AsteroidController : MonoBehaviour
                     t.gameObject.SetActive(true);
                     asteroidParts.Add(t);
 
+                    // Rigidbody
                     Rigidbody rb = t.GetComponent<Rigidbody>();
-                    if (rb == null)
-                    {
-                        rb = t.gameObject.AddComponent<Rigidbody>();
-                        Debug.Log($"[追加] Rigidbody: {t.name}");
-                    }
-
+                    if (rb == null) rb = t.gameObject.AddComponent<Rigidbody>();
                     rb.isKinematic = false;
-
-                    // すべての軸・回転を一旦固定（発射前）
                     rb.constraints = RigidbodyConstraints.FreezeAll;
 
+                    // Collider
                     if (t.GetComponent<Collider>() == null)
                     {
                         t.gameObject.AddComponent<BoxCollider>();
-                        Debug.Log($"[追加] Collider: {t.name}");
                     }
                 }
             }
-
-            Debug.Log($"[確認完了] Cube数: {asteroidParts.Count}");
         }
     }
 
-    // Cubeを発射（XZ移動を許可し、Y軸と回転は固定）
     void ShootCube(Transform cube, int index)
     {
         if (cube == null) return;
@@ -145,22 +148,15 @@ public class AsteroidController : MonoBehaviour
         Rigidbody rb = cube.GetComponent<Rigidbody>();
         if (rb != null)
         {
-            // 発射時：XZの固定を解除、Yと回転は固定のまま
             rb.constraints = RigidbodyConstraints.FreezePositionY | RigidbodyConstraints.FreezeRotation;
 
-            // ★親から切り離して独立させる（spawnPoint に追従しないように）
             cube.SetParent(null);
-
-            // 少しずらして衝突を防止
             cube.position += new Vector3(Random.Range(-0.05f, 0.05f), 0, Random.Range(-0.05f, 0.05f));
-
             rb.linearVelocity = Vector3.zero;
             rb.angularVelocity = Vector3.zero;
 
             Vector3 shootDirection = Camera.main.transform.forward;
             rb.AddForce(shootDirection * shootForce, ForceMode.Impulse);
-
-            Debug.Log($"[発射] Cube {index}: {cube.name} 位置: {cube.position}");
         }
     }
 }
