@@ -21,14 +21,6 @@ namespace CameraSample.Scripts._3D
         [SerializeField] private float mouseSensitivity = 100f;
         [SerializeField] private float mouseSmoothTime = 0.05f;
 
-        [Header("グラスホッパースキル設定")]
-        [SerializeField] private GameObject grasshopperPrefab;
-        [SerializeField] private Transform grasshopperPoint;
-        [SerializeField] private float grasshopperCooldown = 5f;
-        [SerializeField] private KeyCode grasshopperKey = KeyCode.V;
-
-        private float nextGrasshopperUseTime = 0f;
-
         private float xRotation = 0f;
         private Vector2 currentMouseDelta;
         private Vector2 currentMouseDeltaVelocity;
@@ -37,7 +29,6 @@ namespace CameraSample.Scripts._3D
         private Vector3 velocity;
         private bool isGrounded;
 
-        // スキル用
         private bool isMovementLocked = false;
         private Vector3 externalVelocity = Vector3.zero;
 
@@ -63,7 +54,6 @@ namespace CameraSample.Scripts._3D
         {
             HandleCameraLook();
             HandleMovementAndJump();
-            HandleGrasshopperSkill();
         }
 
         private void HandleCameraLook()
@@ -116,11 +106,10 @@ namespace CameraSample.Scripts._3D
 
             velocity.y += gravity * Time.deltaTime;
 
-            // === 合成移動（スキル + 通常移動 + 重力）===
             Vector3 totalMove;
             if (isMovementLocked)
             {
-                totalMove = externalVelocity; // スキル発動中はそのまま使う（yも上書きしない）
+                totalMove = externalVelocity;
             }
             else
             {
@@ -131,43 +120,16 @@ namespace CameraSample.Scripts._3D
             characterController.Move(totalMove * Time.deltaTime);
         }
 
-        private void HandleGrasshopperSkill()
+        // グラスホッパー発動用
+        public void ActivateGrasshopper(Vector3 direction)
         {
-            if (Input.GetKeyDown(grasshopperKey) && Time.time >= nextGrasshopperUseTime)
-            {
-                // 必要に応じてプレハブ生成
-                // if (grasshopperPrefab != null && grasshopperPoint != null)
-                // {
-                //     Instantiate(grasshopperPrefab, grasshopperPoint.position, Quaternion.identity);
-                // }
-
-                Vector3 inputDir = Vector3.zero;
-                if (Input.GetKey(forwardKey)) inputDir += Vector3.forward;
-                if (Input.GetKey(backwardKey)) inputDir += Vector3.back;
-                if (Input.GetKey(leftKey)) inputDir += Vector3.left;
-                if (Input.GetKey(rightKey)) inputDir += Vector3.right;
-
-                inputDir = inputDir.normalized;
-
-                Vector3 moveDir;
-                if (inputDir == Vector3.zero)
-                {
-                    moveDir = Vector3.up; // ニュートラル入力時は真上ジャンプ
-                }
-                else
-                {
-                    moveDir = transform.TransformDirection(inputDir); // 入力方向に飛ぶ
-                }
-
-                LockMovement(0.5f, moveDir);
-                nextGrasshopperUseTime = Time.time + grasshopperCooldown;
-            }
+            LockMovement(0.5f, direction);
         }
 
         private void LockMovement(float duration, Vector3 direction)
         {
             isMovementLocked = true;
-            externalVelocity = direction.normalized * moveSpeed * 3f; // 通常の3倍速度で移動
+            externalVelocity = direction.normalized * moveSpeed * 3f;
             Invoke(nameof(UnlockMovement), duration);
         }
 

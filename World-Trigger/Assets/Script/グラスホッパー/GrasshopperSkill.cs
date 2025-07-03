@@ -1,24 +1,59 @@
 using UnityEngine;
+using CameraSample.Scripts._3D; // ← PlayerController3D が定義されている名前空間
 
 public class GrasshopperSkill : MonoBehaviour
 {
-    public GameObject grasshopperPrefab;       // グラスホッパーのプレハブ
-    public Transform grasshopperPoint;         // 足元の設置ポイント
-    public float cooldownTime = 5f;            // クールダウン時間（秒）
-    private float nextUseTime = 0f;            // 次に使用可能な時間
+    public GameObject grasshopperPrefab;
+    public Transform grasshopperPoint;
+    public float cooldownTime = 5f;
+
+    public PlayerController3D playerController;
+
+    private float nextUseTime = 0f;
+
+    //キーカスタマイズ対応
+    private KeyCode activationKey = KeyCode.V;
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.V) && Time.time >= nextUseTime)
+        if (Input.GetKeyDown(activationKey) && Time.time >= nextUseTime)
         {
-            // グラスホッパーを足元に設置
-            GameObject instance = Instantiate(grasshopperPrefab, grasshopperPoint.position, Quaternion.identity);
+            if (grasshopperPrefab && grasshopperPoint)
+            {
+                GameObject instance = Instantiate(grasshopperPrefab, grasshopperPoint.position, Quaternion.identity);
+                Destroy(instance, 1f);
+            }
 
-            // 1秒後に自動で削除
-            Destroy(instance, 1f);
+            Vector3 inputDir = Vector3.zero;
+            if (Input.GetKey(KeyCode.W)) inputDir += Vector3.forward;
+            if (Input.GetKey(KeyCode.S)) inputDir += Vector3.back;
+            if (Input.GetKey(KeyCode.A)) inputDir += Vector3.left;
+            if (Input.GetKey(KeyCode.D)) inputDir += Vector3.right;
 
-            // クールダウンを設定
+            inputDir = inputDir.normalized;
+
+            Vector3 moveDir;
+            if (inputDir == Vector3.zero)
+            {
+                moveDir = Vector3.up;
+            }
+            else
+            {
+                moveDir = transform.TransformDirection(inputDir);
+            }
+
+            if (playerController != null)
+            {
+                playerController.ActivateGrasshopper(moveDir);
+            }
+
             nextUseTime = Time.time + cooldownTime;
         }
+    }
+
+    // スキルキーを外部から設定可能に
+    public void SetActivationKey(KeyCode key)
+    {
+        activationKey = key;
     }
 }

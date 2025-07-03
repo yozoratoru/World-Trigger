@@ -2395,6 +2395,7 @@ MonoBehaviour:
   grasshopperPrefab: {fileID: 6965603133755837652, guid: 101c8e1f79cd9af46a812d0b50ac98d9, type: 3}
   grasshopperPoint: {fileID: 462206389}
   cooldownTime: 0.7
+  playerController: {fileID: 904987618}
 --- !u!1 &494061228
 GameObject:
   m_ObjectHideFlags: 0
@@ -3988,10 +3989,6 @@ MonoBehaviour:
   cameraTransform: {fileID: 432655063}
   mouseSensitivity: 100
   mouseSmoothTime: 0.05
-  grasshopperPrefab: {fileID: 6965603133755837652, guid: 101c8e1f79cd9af46a812d0b50ac98d9, type: 3}
-  grasshopperPoint: {fileID: 462206389}
-  grasshopperCooldown: 0.7
-  grasshopperKey: 118
 --- !u!1 &905980861
 GameObject:
   m_ObjectHideFlags: 0
@@ -4050,6 +4047,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   asteroidController: {fileID: 904987617}
+  grasshopperSkill: {fileID: 462206390}
+  torion: {fileID: 2139238797}
 --- !u!1 &1013447312
 GameObject:
   m_ObjectHideFlags: 0
