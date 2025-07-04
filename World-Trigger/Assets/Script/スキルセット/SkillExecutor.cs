@@ -9,9 +9,9 @@ public class SkillExecutor : MonoBehaviour
     [SerializeField] private GrasshopperSkill grasshopperSkill;
 
     [Header("アステロイドの親トランスフォーム（torion）")]
-    [SerializeField] private Transform torion;  // ← ここを Inspector で設定してください
+    [SerializeField] private Transform torion;
 
-    private string activeSkillName = "";  // 現在有効なスキル名
+    private string activeSkillName = "";
 
     void Awake()
     {
@@ -29,55 +29,65 @@ public class SkillExecutor : MonoBehaviour
     {
         Debug.Log($"SkillExecutor: {skillName} をキー {activationKey} で実行");
 
-        // スキル切り替え時にすべて無効化（かつ不要なオブジェクト削除）
         DisableAllSkills();
 
-        if (skillName == "アステロイド")
+        if (asteroidController == null && (skillName == "アステロイド" || skillName == "ハウンド" || skillName == "メテオラ"))
         {
-            if (asteroidController != null)
-            {
+            Debug.LogWarning("AsteroidController が未設定です！");
+            return;
+        }
+
+        switch (skillName)
+        {
+            case "アステロイド":
+                asteroidController.currentBulletType = AsteroidController.BulletType.Normal;
                 asteroidController.SetActivationKey(activationKey);
                 activeSkillName = "アステロイド";
-            }
-            else
-            {
-                Debug.LogWarning("AsteroidController が未設定です！");
-            }
-        }
-        else if (skillName == "グラスホッパー")
-        {
-            if (grasshopperSkill != null)
-            {
-                grasshopperSkill.SetActivationKey(activationKey);
-                activeSkillName = "グラスホッパー";
-            }
-            else
-            {
-                Debug.LogWarning("GrasshopperSkill が未設定です！");
-            }
-        }
-        else
-        {
-            Debug.LogWarning($"未対応のスキル: {skillName}");
+                break;
+
+            case "ハウンド":
+                asteroidController.currentBulletType = AsteroidController.BulletType.Hound;
+                asteroidController.SetActivationKey(activationKey);
+                activeSkillName = "ハウンド";
+                break;
+
+            case "メテオラ":
+                asteroidController.currentBulletType = AsteroidController.BulletType.Explosion;
+                asteroidController.SetActivationKey(activationKey);
+                activeSkillName = "メテオラ";
+                break;
+
+            case "グラスホッパー":
+                if (grasshopperSkill != null)
+                {
+                    grasshopperSkill.SetActivationKey(activationKey);
+                    activeSkillName = "グラスホッパー";
+                }
+                else
+                {
+                    Debug.LogWarning("GrasshopperSkill が未設定です！");
+                }
+                break;
+
+            default:
+                Debug.LogWarning($"未対応のスキル: {skillName}");
+                break;
         }
     }
 
     private void DisableAllSkills()
     {
-        // アステロイドの無効化
         if (asteroidController != null)
         {
             asteroidController.SetActivationKey(KeyCode.None);
         }
 
-        // グラスホッパーの無効化
         if (grasshopperSkill != null)
         {
             grasshopperSkill.SetActivationKey(KeyCode.None);
         }
 
-        // ★ アステロイドがアクティブだった場合、torionの子オブジェクト削除
-        if (activeSkillName == "アステロイド" && torion != null)
+        if ((activeSkillName == "アステロイド" || activeSkillName == "ハウンド" || activeSkillName == "メテオラ") && torion != null)
         {
             for (int i = torion.childCount - 1; i >= 0; i--)
             {

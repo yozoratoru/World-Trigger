@@ -8,6 +8,16 @@ public class AsteroidController : MonoBehaviour
     public float shootForce = 10f;
     public float shootInterval = 0.1f;
 
+    public enum BulletType
+    {
+        Normal,
+        Hound,
+        Explosion,
+        Bind
+    }
+
+    public BulletType currentBulletType = BulletType.Normal;
+
     private GameObject currentAsteroid;
     private float holdTime = 0f;
     private int currentLevel = 0;
@@ -24,7 +34,7 @@ public class AsteroidController : MonoBehaviour
     public void SetActivationKey(KeyCode key)
     {
         activationKey = key;
-        justSet = true; // スキル切り替え直後の誤発動防止
+        justSet = true;
     }
 
     void Update()
@@ -37,13 +47,13 @@ public class AsteroidController : MonoBehaviour
             return;
         }
 
-        // キーを押した瞬間：チャージ開始
+        // チャージ開始
         if (Input.GetKeyDown(activationKey))
         {
             StartCharging();
         }
 
-        // チャージ中：レベルアップ、位置追従
+        // チャージ中の更新
         if (Input.GetKey(activationKey) && isCharging)
         {
             holdTime += Time.deltaTime;
@@ -56,20 +66,20 @@ public class AsteroidController : MonoBehaviour
             }
         }
 
-        // キーを離した瞬間：チャージ終了
+        // チャージ終了
         if (Input.GetKeyUp(activationKey) && isCharging)
         {
             ConfirmAsteroid();
         }
 
-        // 左クリック：分離Cubeを順に発射
+        // 分離Cubeの順次発射
         if (Input.GetMouseButton(0) && isConfirmed && asteroidParts.Count > 0)
         {
             shootTimer += Time.deltaTime;
 
             if (shootTimer >= shootInterval && currentShootIndex < asteroidParts.Count)
             {
-                ShootCube(asteroidParts[currentShootIndex], currentShootIndex);
+                ShootCube(asteroidParts[currentShootIndex]);
                 currentShootIndex++;
                 shootTimer = 0f;
             }
@@ -125,38 +135,55 @@ public class AsteroidController : MonoBehaviour
                     t.gameObject.SetActive(true);
                     asteroidParts.Add(t);
 
-                    // Rigidbody
                     Rigidbody rb = t.GetComponent<Rigidbody>();
                     if (rb == null) rb = t.gameObject.AddComponent<Rigidbody>();
                     rb.isKinematic = false;
                     rb.constraints = RigidbodyConstraints.FreezeAll;
 
-                    // Collider
                     if (t.GetComponent<Collider>() == null)
-                    {
                         t.gameObject.AddComponent<BoxCollider>();
-                    }
+
+                    // 弾タイプに応じて挙動スクリプトを追加
+                    AddBulletBehavior(t.gameObject);
                 }
             }
         }
     }
 
-    void ShootCube(Transform cube, int index)
+    void AddBulletBehavior(GameObject cube)
+    {
+        switch (currentBulletType)
+        {
+            case BulletType.Hound:
+                cube.AddComponent<HoundProjectile>();
+                break;
+            case BulletType.Explosion:
+                cube.AddComponent<ExplosionProjectile>();
+                break;
+            case BulletType.Bind:
+                cube.AddComponent<BindProjectile>();
+                break;
+            case BulletType.Normal:
+            default:
+                cube.AddComponent<NormalProjectile>();
+                break;
+        }
+    }
+
+    void ShootCube(Transform cube)
     {
         if (cube == null) return;
 
         Rigidbody rb = cube.GetComponent<Rigidbody>();
         if (rb != null)
         {
-            rb.constraints = RigidbodyConstraints.FreezePositionY | RigidbodyConstraints.FreezeRotation;
-
             cube.SetParent(null);
             cube.position += new Vector3(Random.Range(-0.05f, 0.05f), 0, Random.Range(-0.05f, 0.05f));
             rb.linearVelocity = Vector3.zero;
             rb.angularVelocity = Vector3.zero;
 
-            Vector3 shootDirection = Camera.main.transform.forward;
-            rb.AddForce(shootDirection * shootForce, ForceMode.Impulse);
+            rb.constraints = RigidbodyConstraints.FreezePositionY | RigidbodyConstraints.FreezeRotation;
+            rb.AddForce(Camera.main.transform.forward * shootForce, ForceMode.Impulse);
         }
     }
 }
