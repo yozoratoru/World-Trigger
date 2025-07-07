@@ -11,22 +11,31 @@ public class ExplosionProjectile : MonoBehaviour
 
     private Rigidbody rb;
     private float timer = 0f;
+    private bool hasLaunched = false;
 
     void Start()
     {
         rb = GetComponent<Rigidbody>();
-        rb.linearVelocity = transform.forward * speed;
     }
 
     void Update()
     {
+        if (!hasLaunched) return;
+
         timer += Time.deltaTime;
         if (timer > lifeTime) Explode();
     }
 
+    public void Launch(Vector3 direction)
+    {
+        if (rb == null) rb = GetComponent<Rigidbody>();
+        rb.linearVelocity = direction.normalized * speed;
+        hasLaunched = true;
+    }
+
     void OnCollisionEnter(Collision collision)
     {
-        Explode();
+        if (hasLaunched) Explode();
     }
 
     void Explode()
@@ -36,7 +45,7 @@ public class ExplosionProjectile : MonoBehaviour
         {
             if (hit.CompareTag(targetTag))
             {
-                // 敵にダメージを与える処理があればここに記述
+                // ダメージ処理
                 Debug.Log($"Damaged {hit.name} for {damage}");
             }
 

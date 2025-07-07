@@ -16,6 +16,5 @@ public class SkillSetData
 [Serializable]
 public class SaveData
 {
-    public int TotalCoins = 100; // 初期コイン
     public SkillSetData skillSet = new SkillSetData(); // スキルセット情報
 }
